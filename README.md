@@ -6,20 +6,20 @@ This Python script allows you to scrape job positions from the Seek website, fil
 
 1. Clone the repository:
 
-'git clone https://github.com/your_username/web-scraper.git'
+`git clone https://github.com/your_username/web-scraper.git`
 
 2. Install the required dependencies:
 
-'pip install beautifulsoup4 docx2txt requests'
+`pip install beautifulsoup4 docx2txt requests`
 
 3. Update the configuration file:
-Modify the desired parameters in config dictionary in '''web-scraping-try.py''' such as the website, job title, location, filter keywords, and other options.
+Modify the desired parameters in config dictionary in `web-scraping-try.py` such as the website, job title, location, filter keywords, and other options.
 
 ## Usage
 
 1. Run the script:
 
-'web-scraping-try.py'
+`web-scraping-try.py`
 
 2. The script will perform the following actions based on the configuration:
 - If `get_from_seek` is set to `True`, it will scrape job positions from the Seek website based on the specified job title and location. The positions will be stored in a JSON file. It will also remove job positions based on specific keywords.
