@@ -17,8 +17,8 @@ class WebScraper:
         # Initialize any necessary variables or configurations
         self.config = config
         self.website = self.config['website']
-        self.positions_file = f"{self.config['job']} positions.json"
-        self.filtered_positions_file = f"filtered {self.config['job']} positions.json"
+        self.positions_file = self.config['positions_file']
+        self.filtered_positions_file = self.config['filtered_positions_file']
         self.filter_keywords = self.config['filter_keywords']
         self.job = self.config['job']
         self.location = self.config['location']
@@ -28,6 +28,7 @@ class WebScraper:
         self.output_file_prefix = f"{self.config['output_file_prefix']}-{self.job}"
         self.cl_positions_file = self.config['cl_positions_file']
         self.open_positions = self.config['open_positions']
+        self.number_of_tabs = self.config['number_of_tabs']
         self.apply_positions = self.config['apply_positions']
         self.applied_folder = self.config['applied_folder']
         self.deleted_folder = self.config['deleted_folder']
@@ -62,12 +63,18 @@ class WebScraper:
     def open_links(self, positions_file):
         with open(positions_file, 'r') as f:
             positions = json.load(f)
+            tabs_count = 0
+
             for position in positions:
                 url = position['link']
-                if position == positions[0]:
-                    subprocess.run(['open', '-n', '-a', 'Google Chrome', '--args', '--new-window', url])
+                if tabs_count < self.number_of_tabs:
+                    if position == positions[0]:
+                        subprocess.run(['open', '-n', '-a', 'Google Chrome', '--args', '--new-window', url])
+                    else:
+                        subprocess.run(['open', '-n', '-a', 'Google Chrome', '--args', '--new-tab', url])
+                    tabs_count += 1
                 else:
-                    subprocess.run(['open', '-n', '-a', 'Google Chrome', '--args', '--new-tab', url])
+                    break  # Break out of the loop if the maximum number of tabs is reached
 
     def create_cl(self, input_filename, output_file_prefix, positions_file, my_keywords_file):
         with open(input_filename, 'rb') as f:
@@ -80,6 +87,7 @@ class WebScraper:
         formatted_date = today.strftime("%e %B %Y")
 
         for position in positions:
+            print(f"Creating CL for {position['title']}")
             title = position['title']
             company = position['company']
             link = position['link']
@@ -132,6 +140,7 @@ class WebScraper:
             positions = json.load(f)
         new_positions = []
         for position in positions:
+            print(f"Filtering {position['title']}")
             url = position['link'] 
             response = requests.get(url)
             soup = BeautifulSoup(response.content, "html.parser")   
@@ -140,6 +149,21 @@ class WebScraper:
                 if self.remove and len([key for key in self.remove if key.lower() in page_text]) == 0:
                     new_positions.append(position)
         return new_positions
+    
+    def check_repeated_keywords(self, my_keywords_file):
+        with open(my_keywords_file, 'r') as f:
+            job_keywords = json.load(f) 
+
+            repeated_keywords = [(keyword1, keyword2) for keyword1 in job_keywords for keyword2 in job_keywords 
+                                 if (keyword1 in keyword2 or keyword2 in keyword1)
+                                 and keyword1 != keyword2]
+
+            if repeated_keywords:
+                print("Partially repeated keywords:")
+                for keyword1, keyword2 in repeated_keywords:
+                    print(f"{keyword1} is partially repeated in {keyword2}")
+            else:
+                print("No partially repeated keywords found.")
 
     def find_keywords(self, positions_file, my_keywords_file):
         with open(positions_file, 'r') as f:
@@ -149,12 +173,12 @@ class WebScraper:
             job_keywords = json.load(f)    
 
         for position in positions:
-            print("Title:", position['title'])
+            print("Keywords for:", position['title'])
             url = position['link'] 
             response = requests.get(url)
             soup = BeautifulSoup(response.content, "html.parser")   
             page_text = soup.get_text().lower()
-            job_keys = set([key for key in job_keywords if f' {key.lower()} ' in page_text])
+            job_keys = set([key for key in job_keywords if f'{key.lower()}' in page_text])
             position['job_keys'] = list(job_keys)
         return positions
 
@@ -171,7 +195,7 @@ class WebScraper:
             
             if not job_elements:
                 break
-            for job_element in job_elements:        
+            for job_element in job_elements: 
                 aria_label = job_element['aria-label']
                 if aria_label:
                     title = aria_label
@@ -217,6 +241,7 @@ class WebScraper:
                     and not any(word in self.remove for word in title.lower().split())
                     and job_link not in links_to_remove
                 ):
+                    print(f'Getting: {title}')
                     position = {
                         "title": title,
                         "company": company,
