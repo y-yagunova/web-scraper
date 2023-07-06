@@ -25,8 +25,9 @@ Modify the desired parameters in config dictionary in `web-scraping-try.py` such
 - If `get_from_seek` is set to `True`, it will scrape job positions from the Seek website based on the specified job title and location. The positions will be stored in a JSON file. It will also remove job positions based on specific keywords.
 - If `filter_positions` is set to `True`, it will filter the positions from the previous step based on the specified filter keywords. The filtered positions will be stored in a separate JSON file.
 - If `find_keywords` is set to `True`, it will analyze the job descriptions of the positions and find specific keywords. The positions with their corresponding keywords will be stored in the original JSON file.
+- If `check_repeated_keys` is set to `True`, it will find partially repeated keys in your keywords file.
 - If `create_cl` is set to `True`, it will generate custom cover letters based on a template file (`template_cl`) and the positions with their keywords. The cover letters will be saved in the `cover_letters` directory.
-- If `open_links` is set to `True`, it will open the job links in Google Chrome. Each link will be opened in a new tab or window.
+- If `open_links` is set to `True`, it will open the job links in Google Chrome. Each link will be opened in a new tab or window. You can modify maximum number of tabs to open.
 - If `apply` is set to `True`, it will open the "apply" links in Google Chrome. Each link will be opened in a new tab or window.
 
 3. Customize the script:
