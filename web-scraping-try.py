@@ -1,24 +1,30 @@
 from web_scraper import WebScraper
 
+job = 'audio engineer'
+
 config = {
+    'get_from_seek': True,
     'website': 'https://www.seek.co.nz',
-    'job': 'audio engineer',
+    'job': job,
     'location': ['auckland',
     'wellington'],
-    'remove': ['senior', 'lead', 'one year', 'contract', 'fixed term', 'leader'],
-    'get_from_seek': True,
-    'filter_positions': False,
-    'find_keywords': False,
-    'filter_keywords': ['grad', 'junior', 'internship', 'graduate'],
+    'remove': ['senior', 'lead', 'one year', 'contract', 'fixed term', 'leader', 'principal', 'Part time', 'Contract/temp'],
+    'positions_file': f'{job} positions.json',
+    'filter_positions': True,
+    'filtered_positions_file': f'filtered {job} positions.json',
+    'filter_keywords': ['Full time'],
+    'check_repeated_keys': False,
+    'find_keywords': True,
     'my_keywords_file': 'config/audio_engineer_keywords.json',
-    'create_cl': False,
+    'create_cl': True,
     'template_cl': 'template_cl.docx',
     'output_file_prefix': 'Full-Name',
-    'cl_positions_file': 'filtered audio engineer positions.json',
-    'open_links': False,
-    'open_positions': 'audio engineer positions.json', 
-    'apply': True,
-    'apply_positions': 'audio engineer positions.json',
+    'cl_positions_file': f'filtered {job} positions.json',
+    'open_links': True,
+    'open_positions': f'filtered {job} positions.json',
+    'number_of_tabs': 10, 
+    'apply': False,
+    'apply_positions': f'{job} positions.json',
     'applied_folder': 'applied_jobs',
     'deleted_folder': 'deleted_jobs'
 }
@@ -37,8 +43,13 @@ if scrapper.config['filter_positions']:
 
 if scrapper.config['find_keywords']:
     # Find specific keywords for the positions and write to .json
+    # The file to filter can be positions_file or filtered_positions_file
     positions = scrapper.find_keywords(scrapper.filtered_positions_file, scrapper.my_keywords_file)
     scrapper.write_to_file(positions, scrapper.filtered_positions_file)
+
+if scrapper.config['check_repeated_keys']:
+    # Find repeated keywords
+    scrapper.check_repeated_keywords(scrapper.my_keywords_file)
 
 if scrapper.config['create_cl']:
     # Create a custom cover letter
